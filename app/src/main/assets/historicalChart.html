@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>historicalChart</title>
+    <script src="https://code.jquery.com/jquery-3.2.1.min.js"></script>
+    <script src="https://code.highcharts.com/stock/highstock.js"></script>
+    <script src="https://code.highcharts.com/modules/exporting.js"></script>
+</head>
+<script type="text/javascript">
+    function drawChart(symbol) {
+        $.get("http://hw8server-env.us-east-1.elasticbeanstalk.com/?quote=" + symbol).then(function(jsonObj) {
+            
+            var timeSeries = jsonObj["Time Series (Daily)"];
+            var data = [];
+            var keys = Object.keys(timeSeries);
+            for (var i = 0; i < 1000; i++) {
+                var point = [];
+                var price = parseFloat(timeSeries[keys[i]]['4. close']);
+                var date = Date.parse(keys[i]);
+                point.push(date);
+                point.push(price);
+                data.push(point);
+            }
+            data = data.reverse();
+            Highcharts.stockChart('historicalChart', {
+                chart: {
+                    zoomType: 'x'
+                },
+                title: {
+                    text: symbol + ' Stock Value'
+                },
+                subtitle: {
+                    text: '<a href="https://www.alphavantage.co/" target="_blank">Source: Alpha Vantage</a>',
+                    useHTML: true
+                },
+                rangeSelector: {
+                    buttons: [{
+                        type: 'week',
+                        count: 1,
+                        text: '1w'
+                    }, {
+                        type: 'month',
+                        count: 1,
+                        text: '1m'
+                    }, {
+                        type: 'month',
+                        count: 6,
+                        text: '6m'
+                    }, {
+                        type: 'year',
+                        count: 1,
+                        text: '1y'
+                    }, {
+                        type: 'all',
+                        text: 'All'
+                    }],
+                    selected: 0
+                },
+                tooltip: {
+                    split: false
+                },
+                series: [{
+                    name: symbol,
+                    data: data,
+                    type: 'area',
+                    threshold: null,
+                    tooltip: {
+                        valueDecimals: 2
+                    }
+                }]
+            });
+        })
+    }
+</script>
+<body>
+    <div id="historicalChart" width="600px" height = "800px"></div>
+
+</body>
+</html>

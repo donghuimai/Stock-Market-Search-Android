@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <ListView
+            android:id="@+id/news_table"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:divider="#D8D8D8"
+            android:dividerHeight="1dp"
+            android:clickable="true">
+        </ListView>
+    </LinearLayout>
+
+        <TextView
+            android:id="@+id/error_message"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:text="Failed to load news data"
+            android:textColor="@color/colorBlack"
+            android:textSize="25sp"
+            android:gravity="center"/>
+
+
+        <ProgressBar
+            android:id="@+id/progress_bar"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:indeterminate="true"
+            android:indeterminateTint="@color/colorBlack"
+            android:layout_centerInParent="true"/>
+    </RelativeLayout>
+
+
+
+
+</LinearLayout>

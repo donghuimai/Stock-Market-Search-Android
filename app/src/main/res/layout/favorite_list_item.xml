@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout 
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+    
+    <TextView
+        android:id="@+id/symbol"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_weight="2"
+        android:textAllCaps="true"
+        android:textColor="@color/colorBlack"
+        android:textSize="25sp"
+        android:layout_marginLeft="16dp"
+        android:layout_gravity="center_vertical"
+        />
+
+    <TextView
+        android:id="@+id/price"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_weight="2"
+        android:textColor="@color/colorBlack"
+        android:textSize="25sp"
+        android:layout_marginLeft="16dp"
+        android:includeFontPadding="false"
+        android:layout_gravity="center_vertical"/>
+
+    <TextView
+        android:id="@+id/change"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_weight="3"
+        android:textSize="25sp"
+        android:layout_marginLeft="16dp"
+        android:includeFontPadding="false"
+        android:layout_gravity="center_vertical"/>
+
+</LinearLayout>

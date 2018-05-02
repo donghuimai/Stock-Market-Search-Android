@@ -1,0 +1,36 @@
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    package="com.example.donghuimai.stockmarketsearch">
+
+    <uses-permission android:name="android.permission.INTERNET"/>
+
+    <provider android:authorities="com.facebook.app.FacebookContentProvider131342527568351"
+        android:name="com.facebook.FacebookContentProvider"
+        android:exported="true" />
+
+    <application
+        android:allowBackup="true"
+        android:icon="@mipmap/ic_launcher"
+        android:label="@string/app_name"
+        android:roundIcon="@mipmap/ic_launcher_round"
+        android:supportsRtl="true"
+        android:theme="@style/AppTheme">
+        <meta-data tools:replace="android:value" android:name="com.facebook.sdk.ApplicationId" android:value="@string/facebook_app_id"/>
+
+
+        <activity
+            android:name=".MainActivity"
+            android:theme="@style/AppThemeNoActionBar"
+            android:windowSoftInputMode="stateHidden">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+        <activity android:name=".DetailActivity"
+                  android:theme="@style/AppThemeNoActionBar"/>
+    </application>
+
+
+
+</manifest>

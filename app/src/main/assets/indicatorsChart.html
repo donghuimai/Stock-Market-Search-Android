@@ -1,0 +1,423 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>indicatorsChart</title>
+    <script src="https://code.jquery.com/jquery-3.2.1.min.js"></script>
+    <script src="https://code.highcharts.com/stock/highstock.js"></script>
+    <script src="https://code.highcharts.com/modules/exporting.js"></script>
+</head>
+<script type="text/javascript">
+    function drawChart(symbol, indicator) {
+        if (indicator == "Price") {
+            indicator = "quote";
+        }
+        $.get("http://hw8server-env.us-east-1.elasticbeanstalk.com/?" + indicator.toLowerCase() + "=" + symbol).then(function(jsonObj) {
+            if (indicator == "STOCH") {
+                var date_pattern = /(\w+)-(\w+)-(\w+)/;
+                var dates = [];
+                var data = jsonObj["Technical Analysis: STOCH"];
+                var k = [];
+                var d = [];
+                var keys = Object.keys(data);
+                var symbol = jsonObj["Meta Data"]['1: Symbol'];
+                for (var i = 0; i < 5 * 4 * 6; i++) {
+                    k.push(parseFloat(data[keys[i]]["SlowK"]));
+                    d.push(parseFloat(data[keys[i]]["SlowD"]));
+                    dates.push(keys[i].replace(date_pattern, '$2/$3'));
+                }
+                k = k.reverse();
+                d = d.reverse();
+                dates = dates.reverse();
+                stochChart(symbol, k, d, dates);   
+            } else if (indicator == "MACD") {
+                var data = jsonObj["Technical Analysis: MACD"];
+                var macd = [];
+                var hist = [];
+                var signal = [];
+                var date_pattern = /(\w+)-(\w+)-(\w+)/;
+                var dates = [];
+                var keys = Object.keys(data);
+                var symbol = jsonObj["Meta Data"]['1: Symbol'];
+                for (var i = 0; i <= 5 * 4 * 6; i++) {
+                    macd.push(parseFloat(data[keys[i]]["MACD"]));
+                    hist.push(parseFloat(data[keys[i]]["MACD_Hist"]));
+                    signal.push(parseFloat(data[keys[i]]["MACD_Signal"]));
+                    dates.push(keys[i].replace(date_pattern, '$2/$3'));
+                }
+                macd = macd.reverse();
+                hist = hist.reverse();
+                signal = signal.reverse();
+                dates = dates.reverse();
+                threeLinesChart(symbol, macd, hist, signal, dates, indicator);
+            } else if (indicator == "BBANDS") {
+                var data = jsonObj["Technical Analysis: BBANDS"];
+                var mid = [];
+                var up = [];
+                var low = [];
+                var date_pattern = /(\w+)-(\w+)-(\w+)/;
+                var dates = [];
+                var keys = Object.keys(data);
+                var symbol = jsonObj["Meta Data"]['1: Symbol'];
+                for (var i = 0; i <= 5 * 4 * 6; i++) {
+                    mid.push(parseFloat(data[keys[i]]["Real Middle Band"]));
+                    up.push(parseFloat(data[keys[i]]["Real Upper Band"]));
+                    low.push(parseFloat(data[keys[i]]["Real Lower Band"]));
+                    dates.push(keys[i].replace(date_pattern, '$2/$3'));
+                }
+                mid = mid.reverse();
+                up = up.reverse();
+                low = low.reverse();
+                dates = dates.reverse();
+                threeLinesChart(symbol, mid, up, low, dates, indicator);
+            } else if (indicator == "quote") {
+                var timeSeries = jsonObj["Time Series (Daily)"];
+                var prices = [];
+                var volumes = []
+                var date_pattern = /(\w+)-(\w+)-(\w+)/;
+                var date = [];
+                var keys = Object.keys(timeSeries);
+                var symbol = jsonObj["Meta Data"]["2. Symbol"];
+                for (var i = 0; i <= 5 * 4 * 6; i++) {
+                    prices.push(parseFloat(timeSeries[keys[i]]['4. close']));
+                    volumes.push(parseInt(timeSeries[keys[i]]['5. volume']));
+                    date.push(keys[i].replace(date_pattern, '$2/$3'));
+                }
+                prices = prices.reverse();
+                volumes = volumes.reverse();
+                date = date.reverse();
+                return priceChart(symbol, prices, volumes, date);
+            } else {
+                var d = jsonObj[Object.keys(jsonObj)[1]];
+                var symbol = jsonObj["Meta Data"]['1: Symbol'];
+                var date_pattern = /(\w+)-(\w+)-(\w+)/;
+                keys = Object.keys(d);
+                var data = [];
+                var date = [];
+                var i;
+                for (i = 0; i <= 5 * 4 * 6; i++) {  
+                    date.push(keys[i].replace(date_pattern, '$2/$3'));
+                    data.push(parseFloat(d[keys[i]][indicator.toUpperCase()]));
+                }
+                data = data.reverse();
+                date = date.reverse();
+                oneLineChart(symbol, data, date, indicator);
+            }
+        })
+    }
+
+    function oneLineChart(symbol, data, dates, indicator) {
+        var title;
+        var yaxis;
+        indicator = indicator.toUpperCase();
+        if (indicator == "SMA") {
+            title = "Simple Moving Average (SMA)";
+            yaxis = "SMA";
+        } else if (indicator == "EMA") {
+            title = "Exponential Moving Average (EMA)";
+            yaxis = "EMA";
+        } else if (indicator == "RSI") {
+            title = "Relative Strength Index (RSI)";
+            yaxis = "RSI";
+        } else if (indicator == "ADX") {
+            title = "Average Directional Movement Index (ADX)";
+            yaxis = "ADX";
+        } else if (indicator == "CCI") {
+            title = "Commondity Channel Index (CCI)";
+            yaxis = "CCI";
+        }
+        var options = {
+            chart: {
+                zoomType: 'x',
+                resetZoomButton: {
+                    position: {
+                        x: 0,
+                        y: 0
+                    }
+                }
+            },
+            title: {
+                text: title
+            },
+            subtitle: {
+                text: '<a href="https://www.alphavantage.co/" target="_blank">Source: Alpha Vantage</a>',
+                useHTML: true
+            },
+            xAxis: {
+                categories: dates,
+                endOnTick: true,
+                startOnTick: true,
+                tickInterval: 2
+
+            },
+            yAxis: {
+                title: {
+                    text: yaxis
+                }
+            },
+            plotOptions: {
+                series: {
+                    color: 'rgb(100, 200, 500)',
+                    lineWidth: 1
+                }
+            },
+            series: [{
+                type: 'line',
+                name: symbol,
+                data: data,
+                tooltip: {
+                    valueDecimals: 2
+                }
+            }]
+        };
+        $("#chart").highcharts(options);
+        postChart(options);
+    }
+
+    function threeLinesChart(symbol, a, b, c, dates, indicator) {
+        var title;
+        var series = [];
+        var yaxis;
+        if (indicator == "MACD") {
+            title = "Moving Average Convergence/Divergence (MACD)";
+            series = [symbol + ' MACD', symbol + ' MACD_Hist', symbol + ' MACD_Signal'];
+            yaxis = "MACD";
+        } else if (indicator == "BBANDS") {
+            title = 'Bollinger Bands (BBANDS)';
+            series = [symbol + ' Real Middle Band', symbol + ' Real Upper Band', symbol + ' Real Lower Band'];
+            yaxis = "BBANDS";
+        }
+        var options = {
+            chart: {
+                zoomType: 'x',
+                resetZoomButton: {
+                    position: {
+                        x: 0,
+                        y: 0
+                    }
+                }
+            },
+            title: {
+                text: title
+            },
+            subtitle: {
+                text: '<a href="https://www.alphavantage.co/" target="_blank">Source: Alpha Vantage</a>',
+                useHTML: true
+            },
+            xAxis: {
+                categories: dates,
+                endOnTick: true,
+                startOnTick: true,
+                tickInterval: 2
+            },
+            yAxis: {
+                title: {
+                    text: yaxis
+                }
+            },
+            series: [{
+                    type: 'line',
+                    name: series[0],
+                    data: a,
+                    color: 'rgb(100, 200, 500)',
+                    lineWidth: 1,
+                    tooltip: {
+                        valueDecimals: 2
+                    }
+                },
+                {
+                    type: 'line',
+                    name: series[1],
+                    data: b,
+                    color: 'rgb(179, 255, 179)',
+                    lineWidth: 1,
+                    tooltip: {
+                        valueDecimals: 2
+                    }
+                },
+                {
+                    type: 'line',
+                    name: series[2],
+                    data: c,
+                    color: 'rgb(0, 0, 0)',
+                    lineWidth: 1,
+                    tooltip: {
+                        valueDecimals: 2
+                    }
+                }
+            ]
+        };
+        $("#chart").highcharts(options);
+        postChart(options);
+    }
+
+    function stochChart(symbol, k, d, dates) {
+        var options = {
+            chart: {
+                zoomType: 'x',
+                resetZoomButton: {
+                    position: {
+                        x: 0,
+                        y: 0
+                    }
+                }
+            },
+            title: {
+                text: 'Stochastic (STOCH)'
+            },
+            subtitle: {
+                text: '<a href="https://www.alphavantage.co/" target="_blank">Source: Alpha Vantage</a>',
+                useHTML: true
+            },
+            xAxis: {
+                categories: dates,
+                endOnTick: true,
+                startOnTick: true,
+                tickInterval: 2
+            },
+            yAxis: {
+                title: {
+                    text: 'STOCH'
+                }
+            },
+            series: [{
+                    type: 'line',
+                    name: symbol + ' SlowK',
+                    data: k,
+                    color: 'rgb(0, 0, 0)',
+                    lineWidth: 1,
+                    tooltip: {
+                        valueDecimals: 2
+                    }
+                },
+                {
+                    type: 'line',
+                    name: symbol + ' SlowD',
+                    data: d,
+                    color: 'rgb(100, 200, 500)',
+                    lineWidth: 1,
+                    tooltip: {
+                        valueDecimals: 2
+                    }
+
+                }
+            ]
+        };
+
+        $('#chart').highcharts(options);
+        postChart(options);
+    }
+
+    function priceChart(symbol, prices, volumes, dates) {
+        var options = {
+            chart: {
+                zoomType: 'x',
+                resetZoomButton: {
+                    position: {
+                        x: 0,
+                        y: 0
+                    }
+                },
+                exporting: {
+                    width: '200px',
+                    url: 'http://export.highcharts.com/'
+                }
+            },
+            title: {
+                text: symbol + " Stock Price And Volume"
+            },
+            subtitle: {
+                text: '<a href="https://www.alphavantage.co/" target="_blank">Source: Alpha Vantage</a>',
+                useHTML: true
+            },
+            xAxis: {
+                categories: dates,
+                endOnTick: true,
+                startOnTick: true,
+                tickInterval: 5
+            },
+            yAxis: [{
+                    title: {
+                        text: 'Stock Price'
+                    },
+                    min: 0
+                },
+                {
+                    title: {
+                        text: 'Volume'
+                    },
+                    labels: {
+                        formatter: function() {
+                            return this.value / 1000000 + 'M';
+                        }
+                    },
+                    maxPadding: 0.1,
+                    opposite: true,
+                    min: 0
+                }
+            ],
+            tooltip: {
+                shared: false
+            },
+            plotOptions: {
+                area: {
+                    fillColor: 'hsl(226, 100%, 95%)',
+                    lineColor: 'hsl(226, 100%, 50%)',
+                    lineWidth: 2,
+                    threshold: null
+                }
+            },
+            series: [{
+                    type: 'area',
+                    name: 'Price',
+                    data: prices,
+                    color: 'hsl(225, 100%, 60%)',
+                    marker: {
+                        enabled: false,
+                        fillColor: 'hsl(225, 100%, 60%)',
+                        states: {
+                            hover: {
+                                enabled: true,
+                                fillColor: 'hsl(225, 100%, 60%)',
+                                lineColor: 'hsl(225, 100%, 60%)'
+                            }
+                        }
+                    },
+                    tooltip: {
+                        valueDecimals: 2
+                    }
+                },
+                {
+                    type: 'column',
+                    name: 'Volume',
+                    data: volumes,
+                    color: '#ff0000',
+                    yAxis: 1
+                }
+            ]
+        }
+        $('#chart').highcharts(options);
+        postChart(options);
+    }
+
+    function postChart(options) {
+        var optionsStr = JSON.stringify(options);
+        var dataString = encodeURI('async=true&type=jpeg&width=600&options=' + optionsStr);
+        $.ajax({
+            url: 'http://hw8server-env.us-east-1.elasticbeanstalk.com/',
+            type: 'POST',
+            data: dataString,
+            success: function(data) {
+                js.getChartData(data);             
+            }    
+        })
+    }
+
+
+
+    
+</script>
+<body>
+    <div id="chart"></div>
+
+</body>
+</html>

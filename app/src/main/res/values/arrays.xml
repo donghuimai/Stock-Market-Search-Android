@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources xmlns:android="http://schemas.android.com/tools">
+    <string-array name="sort_arrays">
+        <item android:state_activated="false" android:color="@color/colorGreyLight">Sort By</item>
+        <item>Default</item>
+        <item>Symbol</item>
+        <item>Price</item>
+        <item>Change</item>
+    </string-array>
+
+    <string-array name="order_arrays">
+        <item android:state_activated="false" android:color="@color/colorGreyLight">Order</item>
+        <item>Ascending</item>
+        <item>Descending</item>
+    </string-array>
+
+    <string-array name="indicator_arrays">
+        <item>Price</item>
+        <item>SMA</item>
+        <item>EMA</item>
+        <item>MACD</item>
+        <item>RSI</item>
+        <item>ADX</item>
+        <item>CCI</item>
+        <item>BBANDS</item>
+        <item>STOCH</item>
+    </string-array>
+
+</resources>
